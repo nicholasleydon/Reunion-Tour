@@ -26,35 +26,47 @@ export default function HostScreen() {
       setBgIndex((prev) => (prev + 1) % BACKGROUND_IMAGES.length);
     }, 15000);
 
-    if (!socket.connected) {
-      socket.connect();
-    }
-    socket.emit('host:createRoom');
+    // Socket state handler to safely unwrap payloads
+    const handleRoomUpdate = (data) => {
+      const roomData = data?.room || data;
+      setRoomState(roomData);
+      if (roomData?.players) {
+        setPlayers(roomData.players);
+      }
+    };
 
-    socket.on('host:roomCreated', (room) => {
-      setRoomState(room);
-    });
+    // Socket connection setup
+    const onConnect = () => {
+      socket.emit('host:createRoom');
+    };
+
+    socket.on('connect', onConnect);
+    socket.on('room:created', handleRoomUpdate);
+    socket.on('host:roomCreated', handleRoomUpdate);
+    socket.on('room:stateUpdate', handleRoomUpdate);
+    socket.on('room:phaseChanged', handleRoomUpdate);
 
     socket.on('host:playerJoined', (player) => {
-      setPlayers((prev) => [...prev, player]);
+      setPlayers((prev) => {
+        if (prev.some((p) => p.id === player.id)) return prev;
+        return [...prev, player];
+      });
     });
 
-    socket.on('room:stateUpdate', (room) => {
-      setRoomState(room);
-      if (room.players) setPlayers(room.players);
-    });
-
-    socket.on('room:phaseChanged', (room) => {
-      setRoomState(room);
-      if (room.players) setPlayers(room.players);
-    });
+    if (!socket.connected) {
+      socket.connect();
+    } else {
+      socket.emit('host:createRoom');
+    }
 
     return () => {
       clearInterval(bgInterval);
-      socket.off('host:roomCreated');
+      socket.off('connect', onConnect);
+      socket.off('room:created', handleRoomUpdate);
+      socket.off('host:roomCreated', handleRoomUpdate);
       socket.off('host:playerJoined');
-      socket.off('room:stateUpdate');
-      socket.off('room:phaseChanged');
+      socket.off('room:stateUpdate', handleRoomUpdate);
+      socket.off('room:phaseChanged', handleRoomUpdate);
     };
   }, []);
 
@@ -110,15 +122,15 @@ export default function HostScreen() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 bg-zinc-800/80 p-4 border border-zinc-700 rounded text-xs text-zinc-300">
             <div>
               <p className="font-bold text-amber-300 uppercase mb-1">1. Join & Pick Vibe</p>
-              <p>Scan QR code, enter name, and pick an instrument avatar[cite: 4, 8, 12]. Headliner picks prompt[cite: 1, 9].</p>
+              <p>Scan QR code, enter name, and pick an instrument avatar. Headliner picks prompt.</p>
             </div>
             <div>
               <p className="font-bold text-amber-300 uppercase mb-1">2. Submit & Match</p>
-              <p>Band submits 1 song per prompt[cite: 4, 10]. Headliner listens and guesses track owners[cite: 4, 6, 7].</p>
+              <p>Band submits 1 song per prompt. Headliner listens and guesses track owners.</p>
             </div>
             <div>
               <p className="font-bold text-amber-300 uppercase mb-1">3. Trivia & Backstory</p>
-              <p>Headliner takes AI trivia[cite: 1, 4] and awards +100 bonus pts for the best backstory[cite: 1, 5]!</p>
+              <p>Headliner takes AI trivia and awards +100 bonus pts for the best backstory!</p>
             </div>
           </div>
 
@@ -138,7 +150,7 @@ export default function HostScreen() {
                 </div>
               ) : (
                 players.map((p, i) => (
-                  <div key={i} className="border border-zinc-700 bg-zinc-800/90 p-4 flex flex-col items-center justify-center text-center rounded shadow-inner">
+                  <div key={p.id || i} className="border border-zinc-700 bg-zinc-800/90 p-4 flex flex-col items-center justify-center text-center rounded shadow-inner">
                     {p.avatar?.image ? (
                       <div className="w-14 h-14 bg-zinc-100 rounded-lg flex items-center justify-center p-2 mb-2 border-2 border-amber-300/40 shadow-sm">
                         <img 
