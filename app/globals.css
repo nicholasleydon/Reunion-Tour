@@ -1,0 +1,38 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  background-color: #4F525C !important; /* Charcoal Slate */
+  color: #F4F3EE !important;
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+/* Hipster Palette Design Tokens */
+.bg-charcoal { background-color: #4F525C; }
+.bg-tan { background-color: #64452D; }
+.bg-cream { background-color: #595747; }
+.bg-cognac { background-color: #AE8781; }
+
+.text-tan { color: #64452D; }
+.text-cream { color: #595747; }
+.text-cognac { color: #AE8781; }
+
+/* Custom Form Input Styling */
+input[type="text"] {
+  color: #F4F3EE !important;
+  background-color: #383A42 !important;
+  -webkit-text-fill-color: #F4F3EE !important;
+  border: 2px solid #595747 !important;
+}
+
+input[type="text"]::placeholder {
+  color: #A3A39E !important;
+  -webkit-text-fill-color: #A3A39E !important;
+}
