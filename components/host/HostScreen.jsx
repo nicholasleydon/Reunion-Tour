@@ -26,7 +26,6 @@ export default function HostScreen() {
       setBgIndex((prev) => (prev + 1) % BACKGROUND_IMAGES.length);
     }, 15000);
 
-    // Socket state handler to safely unwrap payloads
     const handleRoomUpdate = (data) => {
       const roomData = data?.room || data;
       setRoomState(roomData);
@@ -35,7 +34,6 @@ export default function HostScreen() {
       }
     };
 
-    // Socket connection setup
     const onConnect = () => {
       socket.emit('host:createRoom');
     };
@@ -72,97 +70,99 @@ export default function HostScreen() {
 
   if (!roomState) {
     return (
-      <div className="flex items-center justify-center h-screen bg-zinc-950 text-white font-mono text-2xl">
-        Booting up stage...
+      <div style={{ minHeight: '100vh', backgroundColor: '#09090B', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'monospace', color: '#F4F3EE', fontSize: '24px' }}>
+        ⚡ BOOTING UP STAGE...
       </div>
     );
   }
 
-  // --- LOBBY PHASE (WITH HOW TO PLAY PANEL & QR CODE) ---
+  const hostBgStyle = {
+    minHeight: '100vh',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontFamily: 'monospace',
+    backgroundColor: '#09090B',
+    backgroundImage: `radial-gradient(circle at center, rgba(9,9,11,0.65) 0%, rgba(5,5,5,0.92) 80%), url('${BACKGROUND_IMAGES[bgIndex]}')`,
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    padding: '24px',
+    boxSizing: 'border-box',
+    transition: 'background-image 1s ease-in-out'
+  };
+
+  // --- LOBBY PHASE ---
   if (roomState.status === 'LOBBY') {
-    const joinLink = `${hostUrl}?room=${roomState.roomCode}`;
+    const roomCode = roomState.roomCode || '----';
+    const joinLink = `${hostUrl || 'http://localhost:3000'}?room=${roomCode}`;
+    const canStart = players.length >= 2;
 
     return (
-      <div 
-        className="min-h-screen text-white p-8 font-mono flex flex-col items-center justify-center bg-cover bg-center transition-all duration-1000"
-        style={{
-          backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.85), rgba(0,0,0,0.7)), url(${BACKGROUND_IMAGES[bgIndex]})`
-        }}
-      >
-        <div className="w-full max-w-6xl border-2 border-amber-200/30 bg-zinc-900/90 p-8 rounded shadow-[8px_8px_0px_0px_#6b4c3e]">
+      <div style={hostBgStyle}>
+        <div style={{ width: '100%', maxWidth: '900px', backgroundColor: '#383A42', border: '3px solid #595747', padding: '32px', boxShadow: '8px 8px 0px 0px #B91C1C', zIndex: 10, boxSizing: 'border-box' }}>
           
           {/* Header & QR Code Section */}
-          <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-6 border-b border-zinc-700 pb-6">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '3px solid #595747', paddingBottom: '24px', marginBottom: '24px', gap: '20px', flexWrap: 'wrap' }}>
             <div>
-              <h1 className="text-5xl font-black uppercase tracking-wider text-amber-100 mb-2">
+              <h1 style={{ fontSize: '42px', fontWeight: '900', textTransform: 'uppercase', color: '#F4F3EE', margin: '0 0 8px 0', letterSpacing: '0.05em' }}>
                 Reunion Tour
               </h1>
-              <p className="text-zinc-400 text-sm">
+              <p style={{ fontSize: '14px', color: '#A3A39E', margin: 0 }}>
                 Join on your phone at:{' '}
-                <span className="text-amber-300 font-bold">{hostUrl || 'Loading...'}</span>
+                <span style={{ color: '#F87171', fontWeight: 'bold', textDecoration: 'underline' }}>{hostUrl || 'Loading...'}</span>
               </p>
             </div>
 
-            {/* Room Code & Scannable QR Code Box */}
-            <div className="flex items-center gap-4 bg-[#6b4c3e] p-4 border-2 border-amber-200/30 rounded">
-              <div className="text-center px-2">
-                <p className="text-[10px] uppercase tracking-widest text-amber-200/70 font-mono">Room Code</p>
-                <p className="text-5xl font-black text-amber-100 font-mono tracking-widest">{roomState.roomCode}</p>
+            {/* Room Code & QR Box */}
+            <div style={{ backgroundColor: '#B91C1C', border: '2px solid #000000', padding: '12px 18px', boxShadow: '4px 4px 0px 0px #F87171', display: 'flex', alignItems: 'center', gap: '20px' }}>
+              <div style={{ textAlign: 'center' }}>
+                <span style={{ display: 'block', fontSize: '11px', fontWeight: '900', color: '#F4F3EE', letterSpacing: '0.1em' }}>ROOM CODE</span>
+                <span style={{ fontSize: '36px', fontWeight: '900', color: '#F4F3EE', letterSpacing: '0.1em' }}>{roomCode}</span>
               </div>
-
-              {hostUrl && (
-                <div className="bg-white p-2 rounded shadow-md">
-                  <QRCodeSVG value={joinLink} size={90} level="M" />
-                </div>
-              )}
+              <div style={{ backgroundColor: '#FFFFFF', padding: '6px', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <QRCodeSVG value={joinLink} size={80} level="M" />
+              </div>
             </div>
           </div>
 
-          {/* Quick Player Directions Panel */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 bg-zinc-800/80 p-4 border border-zinc-700 rounded text-xs text-zinc-300">
+          {/* How to Play Directions Panel */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', marginBottom: '24px', backgroundColor: '#27272A', padding: '16px', border: '2px solid #595747', fontSize: '12px', color: '#F4F3EE' }}>
             <div>
-              <p className="font-bold text-amber-300 uppercase mb-1">1. Join & Pick Vibe</p>
-              <p>Scan QR code, enter name, and pick an instrument avatar. Headliner picks prompt.</p>
+              <p style={{ fontWeight: 'bold', color: '#F87171', textTransform: 'uppercase', marginBottom: '4px', marginTop: 0 }}>1. Join & Pick Vibe</p>
+              <p style={{ margin: 0, color: '#A3A39E', lineHeight: '1.4' }}>Scan QR code, enter name, and pick an instrument avatar. Headliner picks prompt.</p>
             </div>
             <div>
-              <p className="font-bold text-amber-300 uppercase mb-1">2. Submit & Match</p>
-              <p>Band submits 1 song per prompt. Headliner listens and guesses track owners.</p>
+              <p style={{ fontWeight: 'bold', color: '#F87171', textTransform: 'uppercase', marginBottom: '4px', marginTop: 0 }}>2. Submit & Match</p>
+              <p style={{ margin: 0, color: '#A3A39E', lineHeight: '1.4' }}>Band submits 1 song per prompt. Headliner listens and guesses track owners.</p>
             </div>
             <div>
-              <p className="font-bold text-amber-300 uppercase mb-1">3. Trivia & Backstory</p>
-              <p>Headliner takes AI trivia and awards +100 bonus pts for the best backstory!</p>
+              <p style={{ fontWeight: 'bold', color: '#F87171', textTransform: 'uppercase', marginBottom: '4px', marginTop: 0 }}>3. Trivia & Backstory</p>
+              <p style={{ margin: 0, color: '#A3A39E', lineHeight: '1.4' }}>Headliner takes AI trivia and awards +100 bonus pts for the best backstory!</p>
             </div>
           </div>
 
           {/* Connected Player Cards */}
           <div>
-            <div className="flex justify-between items-center mb-4">
-              <p className="text-xs text-zinc-400 uppercase tracking-widest">
-                BACKSTAGE PASSES ({players.length})
-              </p>
-              <p className="text-xs text-amber-300/80 italic">Need at least 2 players to start</p>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+              <span style={{ fontSize: '14px', color: '#E4E4E7', fontWeight: 'bold' }}>BACKSTAGE PASSES ({players.length})</span>
+              <span style={{ fontSize: '12px', color: '#F87171', fontStyle: 'italic' }}>Need at least 2 players to start</span>
             </div>
 
-            <div className="grid grid-cols-4 gap-4">
+            <div style={{ minHeight: '100px', padding: '16px', border: '2px solid #595747', backgroundColor: '#4F525C', display: 'flex', gap: '16px', flexWrap: 'wrap', alignItems: 'center' }}>
               {players.length === 0 ? (
-                <div className="col-span-4 text-center py-10 text-zinc-500 font-bold text-lg animate-pulse border border-dashed border-zinc-800 rounded">
-                  Waiting for the band to get back together...
-                </div>
+                <p style={{ color: '#A3A39E', fontStyle: 'italic', margin: 0, width: '100%', textAlign: 'center' }}>Waiting for the band to get back together...</p>
               ) : (
                 players.map((p, i) => (
-                  <div key={p.id || i} className="border border-zinc-700 bg-zinc-800/90 p-4 flex flex-col items-center justify-center text-center rounded shadow-inner">
+                  <div key={p.id || i} style={{ backgroundColor: '#383A42', color: '#F4F3EE', padding: '10px 16px', border: '2px solid #595747', fontWeight: '900', display: 'flex', gap: '12px', alignItems: 'center', boxShadow: '3px 3px 0px 0px #B91C1C' }}>
                     {p.avatar?.image ? (
-                      <div className="w-14 h-14 bg-zinc-100 rounded-lg flex items-center justify-center p-2 mb-2 border-2 border-amber-300/40 shadow-sm">
-                        <img 
-                          src={p.avatar.image} 
-                          alt={p.name} 
-                          className="w-10 h-10 object-contain" 
-                        />
+                      <div style={{ width: '48px', height: '48px', backgroundColor: '#E5E5E5', borderRadius: '4px', border: '2px solid #F59E0B', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        <img src={p.avatar.image} alt={p.name} style={{ width: '36px', height: '36px', objectFit: 'contain' }} />
                       </div>
                     ) : (
-                      <div className="text-3xl mb-2">🎸</div>
+                      <span style={{ fontSize: '28px' }}>🎸</span>
                     )}
-                    <p className="text-sm font-bold text-amber-100 truncate w-full">{p.name}</p>
+                    <span style={{ fontSize: '16px', textTransform: 'uppercase' }}>{p.name}</span>
                   </div>
                 ))
               )}
@@ -170,17 +170,29 @@ export default function HostScreen() {
           </div>
 
           {/* Start Game Trigger */}
-          {players.length >= 2 && (
-            <div className="mt-6 text-center">
-              <button 
-                onClick={() => socket.emit('host:startGame', { roomCode: roomState.roomCode })}
-                className="bg-amber-400 text-zinc-950 text-xl font-black py-3 px-8 rounded border-2 border-amber-300 hover:bg-amber-300 hover:scale-105 transition-all uppercase tracking-wider inline-flex items-center justify-center gap-3 shadow-lg"
-              >
-                <span>Start The Show</span>
-                <img src="/mic.png" alt="Mic" className="w-6 h-6 object-contain" />
-              </button>
-            </div>
-          )}
+          <div style={{ marginTop: '28px', textAlign: 'right' }}>
+            <button 
+              onClick={() => socket.emit('host:startGame', { roomCode })}
+              disabled={!canStart}
+              style={{ 
+                padding: '14px 28px', 
+                fontSize: '20px', 
+                fontWeight: '900', 
+                backgroundColor: canStart ? '#B91C1C' : '#383A42', 
+                color: '#F4F3EE', 
+                border: '2px solid #000', 
+                cursor: canStart ? 'pointer' : 'not-allowed',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '10px',
+                boxShadow: canStart ? '4px 4px 0px 0px #F87171' : 'none',
+                textTransform: 'uppercase'
+              }}
+            >
+              <span>Start The Show</span>
+              <img src="/mic.png" alt="Mic" style={{ width: '24px', height: '24px', objectFit: 'contain' }} />
+            </button>
+          </div>
 
         </div>
       </div>
@@ -192,23 +204,18 @@ export default function HostScreen() {
     const activePlayer = players.find(p => p.id === roomState.currentRound?.activePlayerId);
 
     return (
-      <div 
-        className="min-h-screen p-12 flex flex-col items-center justify-center font-mono text-white bg-cover bg-center"
-        style={{
-          backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.85), rgba(0,0,0,0.7)), url(${BACKGROUND_IMAGES[bgIndex]})`
-        }}
-      >
-        <div className="text-center max-w-4xl w-full border-2 border-amber-200/30 bg-zinc-900/90 p-12 shadow-[8px_8px_0px_0px_#6b4c3e]">
-          <h2 className="text-3xl font-black uppercase mb-8 text-amber-100">
-            <span className="bg-[#6b4c3e] px-4 py-1 border border-amber-200/30 mr-4 text-amber-200">Setlist Picker</span>
+      <div style={hostBgStyle}>
+        <div style={{ width: '100%', maxWidth: '850px', backgroundColor: '#383A42', border: '3px solid #595747', padding: '32px', boxShadow: '8px 8px 0px 0px #B91C1C', textAlign: 'center', color: '#F4F3EE' }}>
+          <h2 style={{ fontSize: '28px', fontWeight: '900', textTransform: 'uppercase', marginBottom: '24px' }}>
+            <span style={{ backgroundColor: '#B91C1C', padding: '4px 12px', border: '1px solid #000', marginRight: '12px' }}>Setlist Picker</span>
             {activePlayer?.name || 'Someone'} is choosing the vibe...
           </h2>
 
-          <div className="grid grid-cols-3 gap-6 mt-8">
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginTop: '24px' }}>
             {(roomState.currentRound?.promptChoices || []).map((cat, idx) => (
-              <div key={idx} className="h-56 border border-zinc-700 bg-zinc-800 p-6 flex flex-col items-center justify-center text-center rounded">
-                <span className="text-xl font-black uppercase text-amber-300 mb-2">{cat.title}</span>
-                <span className="text-xs text-zinc-300">{cat.description}</span>
+              <div key={idx} style={{ minHeight: '160px', border: '2px solid #595747', backgroundColor: '#27272A', padding: '16px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ fontSize: '18px', fontWeight: '900', color: '#F87171', marginBottom: '8px', textTransform: 'uppercase' }}>{cat.title}</span>
+                <span style={{ fontSize: '12px', color: '#A3A39E' }}>{cat.description}</span>
               </div>
             ))}
           </div>
@@ -217,7 +224,7 @@ export default function HostScreen() {
     );
   }
 
-  // --- SCORE RECAP PHASE (LED VOLUME METER) ---
+  // --- SCORE RECAP PHASE ---
   if (roomState.status === 'SCORE_RECAP') {
     return <ScoreboardMeter roomState={roomState} />;
   }
