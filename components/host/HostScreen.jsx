@@ -18,6 +18,7 @@ export default function HostScreen() {
   const [bgIndex, setBgIndex] = useState(0);
 
   useEffect(() => {
+    // Dynamically grab current deployed or local domain origin
     if (typeof window !== 'undefined') {
       setHostUrl(window.location.origin);
     }
@@ -27,7 +28,9 @@ export default function HostScreen() {
       setBgIndex((prev) => (prev + 1) % BACKGROUND_IMAGES.length);
     }, 15000);
 
-    socket.connect();
+    if (!socket.connected) {
+      socket.connect();
+    }
     socket.emit('host:createRoom');
 
     socket.on('host:roomCreated', (room) => {
@@ -54,7 +57,6 @@ export default function HostScreen() {
       socket.off('host:playerJoined');
       socket.off('room:stateUpdate');
       socket.off('room:phaseChanged');
-      socket.disconnect();
     };
   }, []);
 
@@ -68,7 +70,8 @@ export default function HostScreen() {
 
   // --- LOBBY PHASE (STAGE THEME WITH QR CODE & PNG AVATARS) ---
   if (roomState.status === 'LOBBY') {
-    const joinLink = `${hostUrl || 'http://192.168.1.160:3000'}?room=${roomState.roomCode}`;
+    // Dynamic Join Link based on active origin
+    const joinLink = `${hostUrl}?room=${roomState.roomCode}`;
 
     return (
       <div 
@@ -87,7 +90,7 @@ export default function HostScreen() {
               </h1>
               <p className="text-zinc-400 text-sm">
                 Join on your phone at:{' '}
-                <span className="text-amber-300 font-bold">{hostUrl || 'http://192.168.1.160:3000'}</span>
+                <span className="text-amber-300 font-bold">{hostUrl || 'Loading...'}</span>
               </p>
             </div>
 
@@ -98,9 +101,11 @@ export default function HostScreen() {
                 <p className="text-5xl font-black text-amber-100 font-mono tracking-widest">{roomState.roomCode}</p>
               </div>
 
-              <div className="bg-white p-2 rounded shadow-md">
-                <QRCodeSVG value={joinLink} size={90} level="M" />
-              </div>
+              {hostUrl && (
+                <div className="bg-white p-2 rounded shadow-md">
+                  <QRCodeSVG value={joinLink} size={90} level="M" />
+                </div>
+              )}
             </div>
           </div>
 

@@ -7,7 +7,6 @@ import Phase4Trivia from './Phase4Trivia';
 import Phase5StoryTime from './Phase5StoryTime';
 import Phase6Recap from './Phase6Recap';
 
-// Array matching your exact public folder background assets
 const BACKGROUND_IMAGES = [
   '/bg-backstage.jpg',
   '/bg-stage-pov.jpg',
@@ -20,7 +19,6 @@ export default function MobileController({ roomState, socket }) {
   const status = roomState?.status || 'LOBBY';
   const player = (roomState?.players || []).find((p) => p.id === socket?.id);
 
-  // Rotate background every 15 seconds to match the host screen vibe
   useEffect(() => {
     const interval = setInterval(() => {
       setBgIndex((prev) => (prev + 1) % BACKGROUND_IMAGES.length);
@@ -48,7 +46,6 @@ export default function MobileController({ roomState, socket }) {
         {/* LOBBY WAIT SCREEN */}
         {status === 'LOBBY' && (
           <div style={{ textAlign: 'center', margin: 'auto 0' }}>
-            {/* Custom Mic Icon */}
             <div style={{ marginBottom: '12px', display: 'flex', justifyContent: 'center' }}>
               <img src="/mic.png" alt="Tour Mic" style={{ width: '64px', height: '64px', objectFit: 'contain' }} />
             </div>
