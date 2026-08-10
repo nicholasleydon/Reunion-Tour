@@ -18,12 +18,10 @@ export default function HostScreen() {
   const [bgIndex, setBgIndex] = useState(0);
 
   useEffect(() => {
-    // Dynamically grab current deployed or local domain origin
     if (typeof window !== 'undefined') {
       setHostUrl(window.location.origin);
     }
 
-    // Rotate background every 15 seconds
     const bgInterval = setInterval(() => {
       setBgIndex((prev) => (prev + 1) % BACKGROUND_IMAGES.length);
     }, 15000);
@@ -68,9 +66,8 @@ export default function HostScreen() {
     );
   }
 
-  // --- LOBBY PHASE (STAGE THEME WITH QR CODE & PNG AVATARS) ---
+  // --- LOBBY PHASE (WITH HOW TO PLAY PANEL & QR CODE) ---
   if (roomState.status === 'LOBBY') {
-    // Dynamic Join Link based on active origin
     const joinLink = `${hostUrl}?room=${roomState.roomCode}`;
 
     return (
@@ -80,10 +77,10 @@ export default function HostScreen() {
           backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.85), rgba(0,0,0,0.7)), url(${BACKGROUND_IMAGES[bgIndex]})`
         }}
       >
-        <div className="w-full max-w-5xl border-2 border-amber-200/30 bg-zinc-900/90 p-8 rounded shadow-[8px_8px_0px_0px_#6b4c3e]">
+        <div className="w-full max-w-6xl border-2 border-amber-200/30 bg-zinc-900/90 p-8 rounded shadow-[8px_8px_0px_0px_#6b4c3e]">
           
           {/* Header & QR Code Section */}
-          <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-6 border-b border-zinc-700 pb-6">
+          <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-6 border-b border-zinc-700 pb-6">
             <div>
               <h1 className="text-5xl font-black uppercase tracking-wider text-amber-100 mb-2">
                 Reunion Tour
@@ -109,6 +106,22 @@ export default function HostScreen() {
             </div>
           </div>
 
+          {/* Quick Player Directions Panel */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 bg-zinc-800/80 p-4 border border-zinc-700 rounded text-xs text-zinc-300">
+            <div>
+              <p className="font-bold text-amber-300 uppercase mb-1">1. Join & Pick Vibe</p>
+              <p>Scan QR code, enter name, and pick an instrument avatar[cite: 4, 8, 12]. Headliner picks prompt[cite: 1, 9].</p>
+            </div>
+            <div>
+              <p className="font-bold text-amber-300 uppercase mb-1">2. Submit & Match</p>
+              <p>Band submits 1 song per prompt[cite: 4, 10]. Headliner listens and guesses track owners[cite: 4, 6, 7].</p>
+            </div>
+            <div>
+              <p className="font-bold text-amber-300 uppercase mb-1">3. Trivia & Backstory</p>
+              <p>Headliner takes AI trivia[cite: 1, 4] and awards +100 bonus pts for the best backstory[cite: 1, 5]!</p>
+            </div>
+          </div>
+
           {/* Connected Player Cards */}
           <div>
             <div className="flex justify-between items-center mb-4">
@@ -120,24 +133,24 @@ export default function HostScreen() {
 
             <div className="grid grid-cols-4 gap-4">
               {players.length === 0 ? (
-                <div className="col-span-4 text-center py-12 text-zinc-500 font-bold text-lg animate-pulse border border-dashed border-zinc-800 rounded">
+                <div className="col-span-4 text-center py-10 text-zinc-500 font-bold text-lg animate-pulse border border-dashed border-zinc-800 rounded">
                   Waiting for the band to get back together...
                 </div>
               ) : (
                 players.map((p, i) => (
                   <div key={i} className="border border-zinc-700 bg-zinc-800/90 p-4 flex flex-col items-center justify-center text-center rounded shadow-inner">
                     {p.avatar?.image ? (
-                      <div className="w-16 h-16 bg-zinc-100 rounded-lg flex items-center justify-center p-2 mb-2 border-2 border-amber-300/40 shadow-sm">
+                      <div className="w-14 h-14 bg-zinc-100 rounded-lg flex items-center justify-center p-2 mb-2 border-2 border-amber-300/40 shadow-sm">
                         <img 
                           src={p.avatar.image} 
                           alt={p.name} 
-                          className="w-12 h-12 object-contain" 
+                          className="w-10 h-10 object-contain" 
                         />
                       </div>
                     ) : (
-                      <div className="text-4xl mb-2">🎸</div>
+                      <div className="text-3xl mb-2">🎸</div>
                     )}
-                    <p className="text-base font-bold text-amber-100 truncate w-full">{p.name}</p>
+                    <p className="text-sm font-bold text-amber-100 truncate w-full">{p.name}</p>
                   </div>
                 ))
               )}
@@ -146,10 +159,10 @@ export default function HostScreen() {
 
           {/* Start Game Trigger */}
           {players.length >= 2 && (
-            <div className="mt-8 text-center">
+            <div className="mt-6 text-center">
               <button 
                 onClick={() => socket.emit('host:startGame', { roomCode: roomState.roomCode })}
-                className="bg-amber-400 text-zinc-950 text-xl font-black py-3 px-8 rounded border-2 border-amber-300 hover:bg-amber-300 hover:scale-105 transition-all uppercase tracking-wider inline-flex items-center justify-center gap-3"
+                className="bg-amber-400 text-zinc-950 text-xl font-black py-3 px-8 rounded border-2 border-amber-300 hover:bg-amber-300 hover:scale-105 transition-all uppercase tracking-wider inline-flex items-center justify-center gap-3 shadow-lg"
               >
                 <span>Start The Show</span>
                 <img src="/mic.png" alt="Mic" className="w-6 h-6 object-contain" />
