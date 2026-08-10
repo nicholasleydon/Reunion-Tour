@@ -126,19 +126,66 @@ export default function HostScreen() {
             </div>
           </div>
 
-          {/* How to Play Directions Panel */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', marginBottom: '24px', backgroundColor: '#27272A', padding: '16px', border: '2px solid #595747', fontSize: '12px', color: '#F4F3EE' }}>
+          {/* Modernized How to Play Directions Panel */}
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', 
+            gap: '16px', 
+            marginBottom: '24px', 
+            backgroundColor: '#27272A', 
+            padding: '18px 20px', 
+            border: '2px solid #595747', 
+            borderRadius: '6px',
+            fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+            color: '#F4F3EE' 
+          }}>
             <div>
-              <p style={{ fontWeight: 'bold', color: '#F87171', textTransform: 'uppercase', marginBottom: '4px', marginTop: 0 }}>1. Join & Pick Vibe</p>
-              <p style={{ margin: 0, color: '#A3A39E', lineHeight: '1.4' }}>Scan QR code, enter name, and pick an instrument avatar. Headliner picks prompt.</p>
+              <p style={{ 
+                fontWeight: '800', 
+                color: '#F87171', 
+                textTransform: 'uppercase', 
+                marginBottom: '6px', 
+                marginTop: 0,
+                fontSize: '13px',
+                letterSpacing: '0.05em' 
+              }}>
+                1. Join & Pick Vibe
+              </p>
+              <p style={{ margin: 0, color: '#D4D4D8', lineHeight: '1.5', fontSize: '13px', fontWeight: '400' }}>
+                Scan QR code, enter name, and pick an instrument avatar. Headliner picks prompt.
+              </p>
             </div>
             <div>
-              <p style={{ fontWeight: 'bold', color: '#F87171', textTransform: 'uppercase', marginBottom: '4px', marginTop: 0 }}>2. Submit & Match</p>
-              <p style={{ margin: 0, color: '#A3A39E', lineHeight: '1.4' }}>Band submits 1 song per prompt. Headliner listens and guesses track owners.</p>
+              <p style={{ 
+                fontWeight: '800', 
+                color: '#F87171', 
+                textTransform: 'uppercase', 
+                marginBottom: '6px', 
+                marginTop: 0,
+                fontSize: '13px',
+                letterSpacing: '0.05em' 
+              }}>
+                2. Submit & Match
+              </p>
+              <p style={{ margin: 0, color: '#D4D4D8', lineHeight: '1.5', fontSize: '13px', fontWeight: '400' }}>
+                Band submits 1 song per prompt. Headliner listens and guesses track owners.
+              </p>
             </div>
             <div>
-              <p style={{ fontWeight: 'bold', color: '#F87171', textTransform: 'uppercase', marginBottom: '4px', marginTop: 0 }}>3. Trivia & Backstory</p>
-              <p style={{ margin: 0, color: '#A3A39E', lineHeight: '1.4' }}>Headliner takes AI trivia and awards +100 bonus pts for the best backstory!</p>
+              <p style={{ 
+                fontWeight: '800', 
+                color: '#F87171', 
+                textTransform: 'uppercase', 
+                marginBottom: '6px', 
+                marginTop: 0,
+                fontSize: '13px',
+                letterSpacing: '0.05em' 
+              }}>
+                3. Trivia & Backstory
+              </p>
+              <p style={{ margin: 0, color: '#D4D4D8', lineHeight: '1.5', fontSize: '13px', fontWeight: '400' }}>
+                Headliner takes AI trivia and awards +100 bonus pts for the best backstory!
+              </p>
             </div>
           </div>
 
